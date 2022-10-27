@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Life</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        #root {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background: rgb(245, 244, 240);
+        }
+
+        #board {
+            display: grid;
+        }
+
+        .cell {
+            height: 2rem;
+            width: 2rem;
+            border-radius: 50%;
+            color: rgb(236, 235, 228);
+            background: currentColor;
+            border: 1px solid rgb(245, 244, 240);
+            box-shadow: 0 0 0.5rem  currentColor;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        const ROWS = 40;
+        const COLUMNS = 70;
+        const PERCENTAGE = 20;
+        const LIVE_CELLS = (ROWS * COLUMNS * PERCENTAGE / 100).toFixed(0);
+        const UPDATE_DELAY = 200;
+
+        let state = {
+            board: []
+        }
+
+        function createBoard(rows, columns) {
+            const newBoard = Array(rows).fill(Array(columns).fill(false))
+            return newBoard;
+        }
+
+        function fillBoard(board) {
+            let newBoard = [...board.map(row => [...row])]
+            const rows = board.length;
+            const columns = board[0].length;
+            let liveCells = 0;
+            while (liveCells < LIVE_CELLS) {
+                const rowSel = parseInt(Math.random() * rows, 10);
+                const columnSel = parseInt(Math.random() * columns, 10);
+                if (typeof newBoard[rowSel][columnSel] === 'boolean' && !newBoard[rowSel][columnSel]) {
+                    newBoard[rowSel][columnSel] = true;
+                    liveCells++;
+                }
+            }
+
+            return newBoard;
+        }
+
+        function countNeighboors(row, column, board) {
+            let totalNeighbors = 0;
+            for (let rowIndex = row - 1; rowIndex <= row + 1; rowIndex++) {
+                for (let colIndex = column - 1; colIndex <= column + 1; colIndex++) {
+                    if (board[rowIndex]?.[colIndex] && !(rowIndex === row && colIndex === column)) totalNeighbors++;
+                }
+            }
+            return totalNeighbors;
+        }
+
+        function checkCell(cell, row, column, board) {
+            const neighboors = countNeighboors(row, column, board);
+            if (cell && (neighboors === 2 || neighboors === 3)) return true
+            if (!cell && neighboors === 3) return true
+            return false;
+        }
+
+        function updateBoard(board) {
+            return board.map((row, rowIndex) => {
+                return row.map((cell, colIndex) => checkCell(cell, rowIndex, colIndex, board))
+            })
+        }
+
+        function createBoardElement(board) {
+            const boardElement = document.createElement('div');
+            boardElement.id = 'board'
+            boardElement.style.gridTemplateColumns = `repeat(${COLUMNS}, 2rem)`
+
+            board.forEach(row => {
+                row.forEach(cell => {
+                    const cellElement = document.createElement('div')
+                    cellElement.className = 'cell'
+                    cellElement.style.color = cell ? 'rgb(171, 221, 96)' : 'rgb(236, 235, 228)'
+                    boardElement.appendChild(cellElement)
+                });
+            });
+            return boardElement
+        }
+
+        function renderDOM(state) {
+            const rootElement = document.getElementById('root');
+            rootElement.innerHTML = ''
+            const boardElement = createBoardElement(state.board);
+            rootElement.appendChild(boardElement)
+        }
+
+        state.board = createBoard(ROWS, COLUMNS);
+        state.board = fillBoard(state.board)
+
+        setInterval(() => {
+            state.board = updateBoard(state.board)
+            renderDOM(state);
+        }, UPDATE_DELAY);
+
+    </script>
+</body>
+
+</html>
