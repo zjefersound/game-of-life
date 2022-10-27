@@ -41,8 +41,13 @@
 <body>
     <div id="root"></div>
     <script>
-        const ROWS = 40;
-        const COLUMNS = 70;
+        const rootElement = document.getElementById('root')
+
+        const clientHeight = rootElement.getBoundingClientRect().height;
+        const clientWidth = rootElement.getBoundingClientRect().width;
+
+        const ROWS = Math.floor(clientHeight / 32); // 32 === 2rem
+        const COLUMNS = Math.floor(clientWidth / 32); // 32 === 2rem
         const PERCENTAGE = 20;
         const LIVE_CELLS = (ROWS * COLUMNS * PERCENTAGE / 100).toFixed(0);
         const UPDATE_DELAY = 200;
